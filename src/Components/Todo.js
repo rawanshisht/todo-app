@@ -1,10 +1,4 @@
-import {
-  Checkbox,
-  FormControlLabel,
-  Stack,
-  IconButton,
-  Box,
-} from "@mui/material";
+import { Checkbox, IconButton } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { ListItem, ListItemText } from "@mui/material";

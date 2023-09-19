@@ -1,7 +1,12 @@
 import React, { useState } from "react";
-import Modal from "react-modal";
-
-Modal.setAppElement("#root"); // Set the root element for accessibility
+import {
+  TextField,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
+} from "@mui/material";
 
 const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
   const [updatedTask, setUpdatedTask] = useState(task.description);
@@ -14,17 +19,38 @@ const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
     onUpdate(task.id, updatedTask);
     onClose();
   };
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onRequestClose={onClose}
-      contentLabel="Update Task Modal"
+    <Dialog
+      open={isOpen}
+      onClose={onClose}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
     >
-      <h2>Update Task</h2>
-      <input type="text" value={updatedTask} onChange={handleInputChange} />
-      <button onClick={handleSave}>Save</button>
-      <button onClick={onClose}>Cancel</button>
-    </Modal>
+      <DialogTitle id="alert-dialog-title">{"Update Task"}</DialogTitle>
+      <DialogContent>
+        <TextField
+          id="standard-basic"
+          value={updatedTask}
+          onChange={handleInputChange}
+          variant="standard"
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} color="primary" size="small">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSave}
+          autoFocus
+          color="primary"
+          size="small"
+          variant="contained"
+        >
+          Save
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 };
 export default UpdateModal;
