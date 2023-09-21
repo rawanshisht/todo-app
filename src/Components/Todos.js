@@ -1,62 +1,77 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Todo from "./Todo";
 import AddIcon from "@mui/icons-material/Add";
-import { Stack, IconButton, Box, TextField, List } from "@mui/material";
+import { Stack, IconButton, Box, TextField, List, Alert } from "@mui/material";
+import axios from "axios";
 
 const Todos = () => {
   const [newTask, setNewTask] = useState("");
-  const [itemList, setItemList] = useState([
-    {
-      id: 1,
-      description: "task 1 description",
-      done: true,
-    },
-    {
-      id: 2,
-      description: "task 2 description",
-      done: false,
-    },
-    {
-      id: 3,
-      description: "task 3 description",
-      done: false,
-    },
-    {
-      id: 4,
-      description: "task 4 description",
-      done: false,
-    },
-  ]);
+  const [itemList, setItemList] = useState([]);
+  const [error, setError] = useState(null);
+  const fetchData = async () => {
+    try {
+      const response = await axios.get("http://localhost:3000/todos");
+      setItemList(response.data.todos);
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const handleAddTask = () => {
-    if (newTask !== "") {
-      const nextID = itemList[itemList.length - 1].id + 1;
-      setItemList([
-        ...itemList,
-        { id: nextID, description: newTask, done: false },
-      ]);
+  const handleAddTask = async () => {
+    try {
+      await axios.post("http://localhost:3000/todos", {
+        description: newTask,
+      });
       setNewTask("");
+      fetchData();
+      setError(null);
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
     }
   };
   const handleTaskInput = (e) => {
     setNewTask(e.target.value);
   };
-  const handleDeleteTask = (id) => {
-    const updatedList = itemList.filter((todo) => todo.id !== id);
-    setItemList(updatedList);
+  const handleDeleteTask = async (id) => {
+    try {
+      await axios.delete(`http://localhost:3000/todos/${id}`);
+      fetchData();
+      setError(null);
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
+    }
   };
-  const handleUpdateTask = (id, updatedDescription) => {
-    const updatedList = itemList.map((task) =>
-      task.id === id ? { ...task, description: updatedDescription } : task
-    );
-    setItemList(updatedList);
+  const handleUpdateTask = async (id, updatedDescription) => {
+    try {
+      await axios.patch(`http://localhost:3000/todos/${id}`, {
+        description: updatedDescription,
+      });
+      fetchData();
+      setError(null);
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
+    }
   };
-  const handleChangeTask = (id) => {
-    const updatedList = itemList.map((task) =>
-      task.id === id ? { ...task, done: !task.done } : task
-    );
-    setItemList(updatedList);
+  const handleChangeTask = async (id) => {
+    try {
+      await axios.patch(`http://localhost:3000/todos/${id}`, {
+        done: !itemList.find((task) => task._id === id).done,
+      });
+      fetchData();
+      setError(null);
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
+    }
   };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleAddTask();
+    }
+  };
+
   return (
     <>
       <Box>
@@ -72,7 +87,9 @@ const Todos = () => {
             variant="standard"
             onChange={handleTaskInput}
             value={newTask}
+            onKeyDown={handleKeyDown}
           />
+
           <IconButton
             aria-label="add"
             color="primary"
@@ -81,6 +98,21 @@ const Todos = () => {
           >
             <AddIcon fontSize="small" />
           </IconButton>
+          {error && (
+            <Alert
+              variant="filled"
+              severity="error"
+              sx={{
+                position: "absolute",
+                top: "0",
+                left: "50%",
+                transform: "translateX(-50%)",
+                zIndex: "1000",
+              }}
+            >
+              {error}
+            </Alert>
+          )}
         </Stack>
         <Stack
           direction="column"
@@ -91,13 +123,13 @@ const Todos = () => {
           <List sx={{ width: "100%", maxWidth: 360 }}>
             {itemList.map((todo) => (
               <Todo
-                key={todo.id}
+                key={todo._id}
                 todo={todo}
-                onDelete={() => handleDeleteTask(todo.id)}
+                onDelete={() => handleDeleteTask(todo._id)}
                 onUpdateTask={(id, updatedDescription) =>
-                  handleUpdateTask(todo.id, updatedDescription)
+                  handleUpdateTask(todo._id, updatedDescription)
                 }
-                handleChange={() => handleChangeTask(todo.id)}
+                handleChange={() => handleChangeTask(todo._id)}
               />
             ))}
           </List>
