@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import Todo from "./Todo";
+import Error from "./Error";
 import AddIcon from "@mui/icons-material/Add";
-import { Stack, IconButton, Box, TextField, List, Alert } from "@mui/material";
+import { Stack, IconButton, Box, TextField, List } from "@mui/material";
 import axios from "axios";
 
 const Todos = () => {
@@ -98,21 +99,7 @@ const Todos = () => {
           >
             <AddIcon fontSize="small" />
           </IconButton>
-          {error && (
-            <Alert
-              variant="filled"
-              severity="error"
-              sx={{
-                position: "absolute",
-                top: "0",
-                left: "50%",
-                transform: "translateX(-50%)",
-                zIndex: "1000",
-              }}
-            >
-              {error}
-            </Alert>
-          )}
+          {error && <Error error={error} />}
         </Stack>
         <Stack
           direction="column"
