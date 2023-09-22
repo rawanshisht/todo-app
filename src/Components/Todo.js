@@ -11,7 +11,7 @@ const Todo = (props) => {
 
   return (
     <>
-      <ListItem>
+      <ListItem key={todo.key}>
         <Checkbox key={todo.key} checked={todo.done} onChange={handleChange} />
         <ListItemText primary={todo.description} secondary="Jan 9, 2014" />
         <IconButton

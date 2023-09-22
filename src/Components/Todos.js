@@ -2,33 +2,51 @@ import { useState, useEffect } from "react";
 import Todo from "./Todo";
 import Error from "./Error";
 import AddIcon from "@mui/icons-material/Add";
-import { Stack, IconButton, Box, TextField, List } from "@mui/material";
+import {
+  Stack,
+  IconButton,
+  Box,
+  TextField,
+  List,
+  CircularProgress,
+} from "@mui/material";
 import axios from "axios";
 
 const Todos = () => {
   const [newTask, setNewTask] = useState("");
   const [itemList, setItemList] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   const fetchData = async () => {
     try {
       const response = await axios.get("http://localhost:3000/todos");
       setItemList(response.data.todos);
+      setLoading(false);
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
+      setLoading(false);
     }
   };
   useEffect(() => {
     fetchData();
   }, []);
-
+  useEffect(() => {
+    if (loading) {
+      fetchData().then(() => setLoading(false));
+    }
+  }, [loading]);
   const handleAddTask = async () => {
     try {
-      await axios.post("http://localhost:3000/todos", {
-        description: newTask,
-      });
-      setNewTask("");
-      fetchData();
-      setError(null);
+      await axios
+        .post("http://localhost:3000/todos", {
+          description: newTask,
+        })
+        .then((res) => {
+          setItemList((prevItemList) => [...prevItemList, res.data.todo]);
+          setError(null);
+          setNewTask("");
+        });
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
     }
@@ -36,40 +54,62 @@ const Todos = () => {
   const handleTaskInput = (e) => {
     setNewTask(e.target.value);
   };
-  const handleDeleteTask = async (id) => {
+  const handleDeleteTask = (id) => {
     try {
-      await axios.delete(`http://localhost:3000/todos/${id}`);
-      fetchData();
-      setError(null);
-    } catch (err) {
-      setError(`Error occured. ${err.response.data.msg}`);
-    }
-  };
-  const handleUpdateTask = async (id, updatedDescription) => {
-    try {
-      await axios.patch(`http://localhost:3000/todos/${id}`, {
-        description: updatedDescription,
+      axios.delete(`http://localhost:3000/todos/${id}`).then(() => {
+        setItemList((prevItemList) =>
+          prevItemList.filter((task) => task._id !== id)
+        );
+        setError(null);
       });
-      fetchData();
-      setError(null);
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
     }
   };
-  const handleChangeTask = async (id) => {
+  const handleUpdateTask = (id, updatedDescription) => {
     try {
-      await axios.patch(`http://localhost:3000/todos/${id}`, {
-        done: !itemList.find((task) => task._id === id).done,
-      });
-      fetchData();
-      setError(null);
+      axios
+        .patch(`http://localhost:3000/todos/${id}`, {
+          description: updatedDescription,
+        })
+        .then(() => {
+          setItemList((prevItemList) =>
+            prevItemList.map((task) =>
+              task._id === id
+                ? { ...task, description: updatedDescription }
+                : task
+            )
+          );
+          setError(null);
+        });
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
     }
   };
-  const handleKeyDown = (e) => {
+  const handleChangeTask = (id) => {
+    try {
+      const updatedTask = itemList.find((task) => task._id === id);
+      const updatedDone = !updatedTask.done;
+      axios
+        .patch(`http://localhost:3000/todos/${id}`, {
+          done: updatedDone,
+        })
+        .then(() => {
+          // Batch state updates
+          setItemList((prevItemList) =>
+            prevItemList.map((task) =>
+              task._id === id ? { ...task, done: updatedDone } : task
+            )
+          );
+          setError(null);
+        });
+    } catch (err) {
+      setError(`Error occured. ${err.response.data.msg}`);
+    }
+  };
+  const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
-      handleAddTask();
+      await handleAddTask();
     }
   };
 
@@ -107,19 +147,23 @@ const Todos = () => {
           alignItems="center"
           spacing={2}
         >
-          <List sx={{ width: "100%", maxWidth: 360 }}>
-            {itemList.map((todo) => (
-              <Todo
-                key={todo._id}
-                todo={todo}
-                onDelete={() => handleDeleteTask(todo._id)}
-                onUpdateTask={(id, updatedDescription) =>
-                  handleUpdateTask(todo._id, updatedDescription)
-                }
-                handleChange={() => handleChangeTask(todo._id)}
-              />
-            ))}
-          </List>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <List sx={{ width: "100%", maxWidth: 360 }}>
+              {itemList.map((todo) => (
+                <Todo
+                  key={todo._id}
+                  todo={todo}
+                  onDelete={() => handleDeleteTask(todo._id)}
+                  onUpdateTask={(id, updatedDescription) =>
+                    handleUpdateTask(todo._id, updatedDescription)
+                  }
+                  handleChange={() => handleChangeTask(todo._id)}
+                />
+              ))}
+            </List>
+          )}
         </Stack>
       </Box>
     </>
