@@ -66,47 +66,27 @@ const Todos = () => {
       setError(`Error occured. ${err.response.data.msg}`);
     }
   };
-  const handleUpdateTask = (id, updatedDescription) => {
+  const handleUpdate = async (id, checkbox, newDescription = null) => {
     try {
-      axios
-        .patch(`http://localhost:3000/todos/${id}`, {
-          description: updatedDescription,
+      setItemList((prevItemList) =>
+        prevItemList.map((task) => {
+          if (task._id === id) {
+            if (checkbox) {
+              return { ...task, done: !task.done };
+            }
+            return { ...task, description: newDescription };
+          }
+          return task;
         })
-        .then(() => {
-          setItemList((prevItemList) =>
-            prevItemList.map((task) =>
-              task._id === id
-                ? { ...task, description: updatedDescription }
-                : task
-            )
-          );
-          setError(null);
-        });
+      );
+      const updatedObj = itemList.find((task) => task._id === id);
+      await axios.patch(`http://localhost:3000/todos/${id}`, updatedObj);
+      setError(null);
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
     }
   };
-  const handleChangeTask = (id) => {
-    try {
-      const updatedTask = itemList.find((task) => task._id === id);
-      const updatedDone = !updatedTask.done;
-      axios
-        .patch(`http://localhost:3000/todos/${id}`, {
-          done: updatedDone,
-        })
-        .then(() => {
-          // Batch state updates
-          setItemList((prevItemList) =>
-            prevItemList.map((task) =>
-              task._id === id ? { ...task, done: updatedDone } : task
-            )
-          );
-          setError(null);
-        });
-    } catch (err) {
-      setError(`Error occured. ${err.response.data.msg}`);
-    }
-  };
+
   const handleKeyDown = async (e) => {
     if (e.key === "Enter") {
       await handleAddTask();
@@ -157,9 +137,11 @@ const Todos = () => {
                   todo={todo}
                   onDelete={() => handleDeleteTask(todo._id)}
                   onUpdateTask={(id, updatedDescription) =>
-                    handleUpdateTask(todo._id, updatedDescription)
+                    handleUpdate(todo._id, false, updatedDescription)
                   }
-                  handleChange={() => handleChangeTask(todo._id)}
+                  handleChange={(id, updatedDescription) =>
+                    handleUpdate(todo._id, true, updatedDescription)
+                  }
                 />
               ))}
             </List>
