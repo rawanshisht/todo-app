@@ -8,7 +8,7 @@ import {
   DialogContent,
 } from "@mui/material";
 
-const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
+const UpdateModal = ({ isOpen, onClose, onUpdate, task, onEnter }) => {
   const [updatedTask, setUpdatedTask] = useState(task.description);
 
   const handleInputChange = (e) => {
@@ -18,6 +18,12 @@ const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
   const handleSave = () => {
     onUpdate(task.id, false, updatedTask);
     onClose();
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSave();
+    }
   };
 
   return (
@@ -34,6 +40,7 @@ const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
           value={updatedTask}
           onChange={handleInputChange}
           variant="standard"
+          onKeyDown={handleKeyDown}
         />
       </DialogContent>
       <DialogActions>

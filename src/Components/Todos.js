@@ -38,15 +38,12 @@ const Todos = () => {
   }, [loading]);
   const handleAddTask = async () => {
     try {
-      await axios
-        .post("http://localhost:3000/todos", {
-          description: newTask,
-        })
-        .then((res) => {
-          setItemList((prevItemList) => [...prevItemList, res.data.todo]);
-          setError(null);
-          setNewTask("");
-        });
+      const res = await axios.post("http://localhost:3000/todos", {
+        description: newTask,
+      });
+      setItemList((prevItemList) => [...prevItemList, res.data.todo]);
+      setError(null);
+      setNewTask("");
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
       setNewTask("");
