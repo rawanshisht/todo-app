@@ -6,13 +6,17 @@ import { useState } from "react";
 import UpdateModal from "./UpdateModal";
 
 const Todo = (props) => {
-  const { todo, onDelete, onUpdateTask, handleChange } = props;
+  const { todo, onDelete, onUpdateTask } = props;
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   return (
     <>
       <ListItem key={todo.key}>
-        <Checkbox key={todo.key} checked={todo.done} onChange={handleChange} />
+        <Checkbox
+          key={todo.key}
+          checked={todo.done}
+          onChange={() => onUpdateTask(todo._id, true)}
+        />
         <ListItemText primary={todo.description} secondary="Jan 9, 2014" />
         <IconButton
           aria-label="edit"

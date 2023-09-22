@@ -49,6 +49,7 @@ const Todos = () => {
         });
     } catch (err) {
       setError(`Error occured. ${err.response.data.msg}`);
+      setNewTask("");
     }
   };
   const handleTaskInput = (e) => {
@@ -66,20 +67,16 @@ const Todos = () => {
       setError(`Error occured. ${err.response.data.msg}`);
     }
   };
-  const handleUpdate = async (id, checkbox, newDescription = null) => {
+  const handleUpdate = async (id, source, newDescription = null) => {
     try {
-      setItemList((prevItemList) =>
-        prevItemList.map((task) => {
-          if (task._id === id) {
-            if (checkbox) {
-              return { ...task, done: !task.done };
-            }
-            return { ...task, description: newDescription };
-          }
-          return task;
-        })
+      const obj = itemList.find((task) => task._id === id);
+      let updatedObj = source
+        ? { ...obj, done: !obj.done }
+        : { ...obj, description: newDescription };
+
+      setItemList((prev) =>
+        prev.map((task) => (task._id === id ? updatedObj : task))
       );
-      const updatedObj = itemList.find((task) => task._id === id);
       await axios.patch(`http://localhost:3000/todos/${id}`, updatedObj);
       setError(null);
     } catch (err) {
@@ -136,11 +133,8 @@ const Todos = () => {
                   key={todo._id}
                   todo={todo}
                   onDelete={() => handleDeleteTask(todo._id)}
-                  onUpdateTask={(id, updatedDescription) =>
-                    handleUpdate(todo._id, false, updatedDescription)
-                  }
-                  handleChange={(id, updatedDescription) =>
-                    handleUpdate(todo._id, true, updatedDescription)
+                  onUpdateTask={(id, checkbox, updatedDescription) =>
+                    handleUpdate(todo._id, checkbox, updatedDescription)
                   }
                 />
               ))}

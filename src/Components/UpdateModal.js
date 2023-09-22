@@ -16,7 +16,7 @@ const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
   };
 
   const handleSave = () => {
-    onUpdate(task.id, updatedTask);
+    onUpdate(task.id, false, updatedTask);
     onClose();
   };
 
