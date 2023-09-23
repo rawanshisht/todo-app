@@ -17,7 +17,7 @@ const Todo = (props) => {
           checked={todo.done}
           onChange={() => onUpdateTask(todo._id, true)}
         />
-        <ListItemText primary={todo.description} secondary="Jan 9, 2014" />
+        <ListItemText primary={todo.description} secondary={todo.date} />
         <IconButton
           aria-label="edit"
           color="primary"

@@ -8,7 +8,7 @@ import {
   DialogContent,
 } from "@mui/material";
 
-const UpdateModal = ({ isOpen, onClose, onUpdate, task, onEnter }) => {
+const UpdateModal = ({ isOpen, onClose, onUpdate, task }) => {
   const [updatedTask, setUpdatedTask] = useState(task.description);
 
   const handleInputChange = (e) => {

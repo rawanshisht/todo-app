@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import Todo from "./Todo";
 import Error from "./Error";
 import AddIcon from "@mui/icons-material/Add";
+import moment from "moment";
+
 import {
   Stack,
   IconButton,
@@ -70,7 +72,7 @@ const Todos = () => {
       let updatedObj = source
         ? { ...obj, done: !obj.done }
         : { ...obj, description: newDescription };
-
+      updatedObj.date = moment().format("HH:mm, DD MMMM YYYY").toString();
       setItemList((prev) =>
         prev.map((task) => (task._id === id ? updatedObj : task))
       );
